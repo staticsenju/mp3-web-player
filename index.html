@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MP3 Web Player</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Cpath d='M26 18v28l20-14-20-14z' fill='%23fff'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+<div id="app">
+  <div class="bg-stack">
+    <div class="bg-layer active" id="bg-layer-0"></div>
+    <div class="bg-layer" id="bg-layer-1"></div>
+    <div id="bg-overlay"></div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-left">
+      <span id="clock"></span>
+      <span class="divider"></span>
+      <span>Music</span>
+    </div>
+    <div class="sb-right">
+      <div class="import-cluster desktop-only">
+        <button id="import-btn" class="sb-btn" title="Import Music">Import</button>
+        <div id="import-menu" class="mini-menu hidden" role="menu" aria-label="Import menu">
+          <button class="menu-item" id="menu-select-files" role="menuitem">Select Files…</button>
+          <button class="menu-item" id="menu-browse-folder" role="menuitem">Browse Folder…</button>
+          <button class="menu-item" id="menu-legacy-folder" role="menuitem">Legacy Folder…</button>
+        </div>
+      </div>
+      <span id="battery-icon" class="battery" aria-label="Battery">
+        <svg width="28" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="1" y="2" width="22" height="10" rx="1.8"></rect>
+          <rect x="24" y="5" width="3" height="4" rx="1"></rect>
+          <rect id="battery-fill" x="2.8" y="3.8" width="18" height="6.4" rx="1" fill="currentColor" stroke="none"></rect>
+        </svg>
+        <span id="battery-bolt" aria-hidden="true">⚡</span>
+        <span id="battery-percent">100%</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <main class="player-shell">
+      <section class="artwork-section">
+        <div class="artwork-wrapper">
+          <img id="artwork" alt="Album Art" class="hidden">
+          <div class="artwork-fallback" id="artwork-fallback"></div>
+        </div>
+      </section>
+
+      <section class="meta-actions">
+        <button id="favorite-btn" class="icon-btn" title="Favorite" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path id="favorite-icon" d="M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.6 2 5.7 4.2 3.5 7.1 3.5c1.6 0 3.1.75 4.1 1.94 1-1.19 2.5-1.94 4.1-1.94 2.9 0 5.1 2.2 5.1 5.1 0 3.7-3.35 6.7-8.45 10.98L12 21z"></path>
+          </svg>
+        </button>
+        <button id="more-btn" class="icon-btn" title="Options" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+            <circle cx="5" cy="12" r="2"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+            <circle cx="19" cy="12" r="2"></circle>
+          </svg>
+        </button>
+        <div id="options-menu" class="mini-menu hidden" role="menu" aria-label="Options">
+          <button id="toggle-dyn-bg-btn" class="menu-item" role="menuitemcheckbox" aria-checked="true">Dynamic Background</button>
+        </div>
+      </section>
+
+      <section class="bottom-panel">
+        <div class="track-meta">
+          <h1 id="track-title">Select Music</h1>
+          <h2 id="track-artist"></h2>
+          <p id="track-album"></p>
+        </div>
+
+        <div class="controls-row">
+          <button id="prev-btn" class="mini-btn" title="Previous (Left Arrow)">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+              <path d="M6 6h2v12H6zM9.5 12l9.5 6V6z"></path>
+            </svg>
+          </button>
+          <button id="play-btn" class="control-btn" title="Play/Pause (Space)">
+            <span id="play-icon">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>
+            </span>
+            <span id="pause-icon" class="hidden">
+              <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zm8 0h4v14h-4z"></path></svg>
+            </span>
+          </button>
+          <button id="next-btn" class="mini-btn" title="Next (Right Arrow)">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+              <path d="M18 6h-2v12h2zM6 18l9.5-6L6 6z"></path>
+            </svg>
+          </button>
+            <button id="shuffle-btn" class="option-btn" title="Shuffle (S)">
+            <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 3h5v5"></path><path d="M4 20l5-5 5 5"></path><path d="M21 3l-7.5 7.5"></path><path d="M4 4l5 5"></path><path d="M16 16h5v5"></path><path d="M21 21l-7.5-7.5"></path>
+            </svg>
+          </button>
+          <button id="repeat-btn" class="option-btn" title="Repeat (R)">
+            <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="17 1 21 5 17 9"></polyline>
+              <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+              <polyline points="7 23 3 19 7 15"></polyline>
+              <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+            </svg>
+            <span id="repeat-mode-indicator"></span>
+          </button>
+        </div>
+
+        <div class="progress-area">
+          <div class="time-row">
+            <span id="current-time">0:00</span>
+            <span id="remaining-time">-0:00</span>
+          </div>
+          <div id="progress-container">
+            <div id="progress-bar"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="file-loader mobile-only">
+        <button id="browse-folder-btn" class="file-button" type="button">Browse Folder</button>
+        <label class="file-label">
+          <input type="file" id="multi-file-input" multiple accept="audio/*">
+          <span>Select Files</span>
+        </label>
+        <label class="file-label legacy-dir" id="legacy-dir-label">
+          <input type="file" id="legacy-dir-input" webkitdirectory multiple accept="audio/*">
+          <span>Legacy Folder</span>
+        </label>
+        <small id="support-note" class="support-note"></small>
+      </section>
+    </main>
+
+    <aside class="playlist-panel">
+      <h3 class="playlist-title">Playlist</h3>
+      <div id="playlist" class="playlist"></div>
+    </aside>
+  </div>
+
+  <div id="playlist-overlay" class="playlist-overlay hidden">
+    <div class="overlay-header">
+      <div class="overlay-handle"></div>
+      <h3>Playlist</h3>
+      <button id="close-overlay-btn" class="close-overlay-btn" title="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div id="playlist-mobile" class="playlist mobile-list"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js" integrity="sha256-nur+se7fh2QjhOwCajWjh/82wPa7cEjCksecqwPBs6k=" crossorigin="anonymous"></script>
+<script src="script.js"></script>
+</body>
+</html>
